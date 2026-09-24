@@ -336,7 +336,7 @@
 
     <div class="footer">
       <div class="cycle" id="cycle">Ciclo —</div>
-      <div>Atualizado a cada ciclo comercial.</div>
+      <div id="updated">Atualizado a cada ciclo comercial.</div>
       <div class="error-note" id="error-note"></div>
     </div>
   </div>
@@ -364,7 +364,8 @@
       16: { VD: { meta: 7191618.12, realizado: 2600000 }, Loja: { meta: 3355115, realizado: 900000 } },
       17: { VD: { meta: 5281554.73, realizado: 400000  }, Loja: { meta: 5513021, realizado: 120000 } }
     },
-    totals: { VD: { meta: 22000000 }, Loja: { meta: 13000000 } }
+    totals: { VD: { meta: 22000000 }, Loja: { meta: 13000000 } },
+    atualizadoEm: "24/09/2026 - 9:13"
   };
 
   const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -436,6 +437,15 @@
         const n = m[1];
         if (!out.cycles[n]) out.cycles[n] = { VD: { meta: 0, realizado: 0 }, Loja: { meta: 0, realizado: 0 } };
         out.cycles[n][canal] = { meta, realizado };
+      }
+    }
+    // Hora de atualização: procura o rótulo "Hora da Atualização" e pega a célula ao lado.
+    for (const cells of rows) {
+      for (let i = 0; i < cells.length; i++) {
+        if (/hora da atualiza/i.test(cells[i] || "")) {
+          const val = (cells[i + 1] || "").trim();
+          if (val) out.atualizadoEm = val;
+        }
       }
     }
     return out;
@@ -604,6 +614,7 @@
 
   (async function init() {
     const data = await fetchData();
+    if (data.atualizadoEm) $("updated").textContent = "Atualizado em: " + data.atualizadoEm;
     const built = buildViews(data);
     requestAnimationFrame(() => buildSelector(built));
   })();
